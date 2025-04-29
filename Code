@@ -1,0 +1,82 @@
+import json
+
+def add_expense(expenses, description, amount, category):
+    expenses.append({"description": description, "amount": amount, "category": category})
+    print(f"Added expense: {description}, Amount: {amount}, Category: {category}")
+
+def get_total_expenses(expenses):
+    return sum(expense['amount'] for expense in expenses)
+
+def get_balance(budget, expenses):
+    return budget - get_total_expenses(expenses)
+
+def show_budget_details(budget, expenses):
+    print(f"Total Budget: {budget}")
+    print("Expenses:")
+    for expense in expenses:
+        print(f"- {expense['description']} ({expense['category']}):{expense['amount']}")
+    print(f"Total Spent: {get_total_expenses(expenses)}")
+    print(f"Remaining Budget: {get_balance(budget, expenses)}")
+    if get_balance(budget, expenses) < 0.2 * budget:
+        print("⚠️ Warning: You are close to exceeding your budget!")
+
+
+
+def load_budget_data(filepath):
+    try:
+        with open(filepath, 'r') as file:
+            data = json.load(file)
+            return data['initial_budget'], data['expenses']
+    except (FileNotFoundError, json.JSONDecodeError):
+        return 0, []  # Return default values if the file doesn't exist or is empty/corrupted
+#
+def save_budget_data(filepath, initial_budget, expenses):
+    data = {
+        'initial_budget': initial_budget,
+        'expenses': expenses
+    }
+    with open(filepath, 'w') as file:
+        json.dump(data, file, indent=4)
+
+def main():
+    budget, expenses = load_budget_data('budget_data.json')
+    if budget == 0:
+        budget = float(input("Please enter your Budget: "))
+
+    print("Welcome to the Budget App")
+    initial_budget = float(input("Please enter your Budget: "))
+    budget = initial_budget
+    expenses = []
+
+    categories = ["Food", "Transportation", "Utilities", "Entertainment", "Healthcare", "Other"]
+
+    while True:
+        print("\nWhat would you like to do?")
+        print("1. Add an expense")
+        print("2. Show budget details")
+        print("3. Exit")
+        choice = input("Enter an option (1/2/3): ")
+
+        if choice == "1":
+            description = input("Enter expense description: ")
+            amount = float(input("Enter expense amount: "))
+            print("Choose a category:")
+            for i, category  in enumerate(categories, 1):
+                print(f"{i}. {category}")
+            category_choice = int(input("Enter the number that matches category: "))
+            if 1<= category_choice <= len(categories):
+                category = categories[category_choice -1]
+                add_expense(expenses, description, amount, category)
+            else:
+                print("Invalid Option!!! Try again?")
+        elif choice == "2":    
+            show_budget_details(budget, expenses)
+        elif choice == "3":
+            print("Now Closing Budget App. Goodbye!")
+            break
+        else:
+            print("Invalid choice!!! Try Again?")
+
+
+if __name__ == "__main__":
+    main() 
